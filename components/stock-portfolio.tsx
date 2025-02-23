@@ -77,20 +77,27 @@ export function StockPortfolio() {
     const total = calculateCurrentValue()
     setCurrentValue(total)
     
-    // Add a new history point when portfolio changes
-    const historyPoint: PortfolioHistory = {
-      date: new Date().toISOString(),
-      value: total
+    // Only add history point if value has changed significantly
+    const lastHistoryPoint = portfolioHistory[portfolioHistory.length - 1]
+    const hasSignificantChange = !lastHistoryPoint || 
+      Math.abs(lastHistoryPoint.value - total) > 0.01 ||
+      Date.now() - new Date(lastHistoryPoint.date).getTime() > 3600000; // 1 hour
+
+    if (hasSignificantChange) {
+      const historyPoint: PortfolioHistory = {
+        date: new Date().toISOString(),
+        value: total
+      }
+      
+      const newHistory = [...portfolioHistory, historyPoint].sort((a, b) => 
+        new Date(a.date).getTime() - new Date(b.date).getTime()
+      )
+      
+      setPortfolioHistory(newHistory)
+      setStorageItem('STOCK_PORTFOLIO', portfolio)
+      setStorageItem('STOCK_PORTFOLIO_HISTORY', newHistory)
     }
-    
-    const newHistory = [...portfolioHistory, historyPoint].sort((a, b) => 
-      new Date(a.date).getTime() - new Date(b.date).getTime()
-    )
-    
-    setPortfolioHistory(newHistory)
-    setStorageItem('STOCK_PORTFOLIO', portfolio)
-    setStorageItem('STOCK_PORTFOLIO_HISTORY', newHistory)
-  }, [portfolio, portfolioHistory])
+  }, [portfolio]) // Only depend on portfolio changes
 
   useEffect(() => {
     const timeRangeInDays: Record<string, number> = {
