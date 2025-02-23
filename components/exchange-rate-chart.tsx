@@ -13,7 +13,12 @@ const mockData = [
   { date: "2023-08-01", rate: 0.85 },
 ]
 
-export function ExchangeRateChart({ fromCurrency, toCurrency }) {
+interface ExchangeRateChartProps {
+  fromCurrency: string;
+  toCurrency: string;
+}
+
+export function ExchangeRateChart({ fromCurrency, toCurrency }: ExchangeRateChartProps) {
   return (
     <ResponsiveContainer width="100%" height={300}>
       <LineChart data={mockData}>

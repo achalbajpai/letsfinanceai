@@ -1,6 +1,6 @@
-import { Avatar } from "@/components/ui/avatar"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { MoreHorizontal } from "lucide-react"
+import Image from "next/image"
 
 const vaults = [
   {
@@ -58,9 +58,13 @@ export function VaultTable() {
           <TableRow key={vault.symbol}>
             <TableCell className="font-medium">
               <div className="flex items-center gap-2">
-                <Avatar className="h-6 w-6">
-                  <img src={`/placeholder.svg?height=24&width=24`} alt={vault.name} />
-                </Avatar>
+                <Image
+                  src={`/placeholder.svg`}
+                  alt={`${vault.name} logo`}
+                  width={32}
+                  height={32}
+                  className="rounded-full"
+                />
                 <div>
                   <div className="font-medium">{vault.name}</div>
                   <div className="text-xs text-muted-foreground">{vault.price}</div>

@@ -1,5 +1,3 @@
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-
 interface Expense {
   id: string;
   amount: number;

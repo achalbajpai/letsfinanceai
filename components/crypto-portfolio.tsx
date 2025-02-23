@@ -11,23 +11,25 @@ import { Plus } from "lucide-react"
 
 export function CryptoPortfolio() {
   const [cryptos, setCryptos] = useState([
-    { id: 1, symbol: "BTC", name: "Bitcoin", quantity: 0.5, purchasePrice: 30000, currentPrice: 35000 },
-    { id: 2, symbol: "ETH", name: "Ethereum", quantity: 2, purchasePrice: 2000, currentPrice: 2200 },
-    { id: 3, symbol: "ADA", name: "Cardano", quantity: 1000, purchasePrice: 1.2, currentPrice: 1.5 },
+    { id: "1", symbol: "BTC", name: "Bitcoin", quantity: 0.5, purchasePrice: 45000, currentPrice: 47000, totalValue: 0.5 * 47000 },
+    { id: "2", symbol: "ETH", name: "Ethereum", quantity: 2, purchasePrice: 3000, currentPrice: 3200, totalValue: 2 * 3200 },
+    { id: "3", symbol: "DOGE", name: "Dogecoin", quantity: 1000, purchasePrice: 0.25, currentPrice: 0.30, totalValue: 1000 * 0.30 },
   ])
 
   const [newCrypto, setNewCrypto] = useState({ symbol: "", name: "", quantity: "", purchasePrice: "" })
 
   const handleAddCrypto = () => {
     if (newCrypto.symbol && newCrypto.name && newCrypto.quantity && newCrypto.purchasePrice) {
+      const newId = (cryptos.length + 1).toString();
       setCryptos([
         ...cryptos,
         {
           ...newCrypto,
-          id: cryptos.length + 1,
+          id: newId,
           quantity: Number.parseFloat(newCrypto.quantity),
           purchasePrice: Number.parseFloat(newCrypto.purchasePrice),
           currentPrice: Number.parseFloat(newCrypto.purchasePrice), // Assuming current price is same as purchase price for simplicity
+          totalValue: Number.parseFloat(newCrypto.quantity) * Number.parseFloat(newCrypto.purchasePrice)
         },
       ])
       setNewCrypto({ symbol: "", name: "", quantity: "", purchasePrice: "" })

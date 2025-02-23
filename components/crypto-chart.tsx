@@ -4,7 +4,17 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recha
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"]
 
-export function CryptoChart({ cryptos }) {
+interface Crypto {
+  symbol: string;
+  quantity: number;
+  currentPrice: number;
+}
+
+interface CryptoChartProps {
+  cryptos: Crypto[];
+}
+
+export function CryptoChart({ cryptos }: CryptoChartProps) {
   const data = cryptos.map((crypto) => ({
     name: crypto.symbol,
     value: crypto.quantity * crypto.currentPrice,

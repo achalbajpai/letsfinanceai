@@ -135,8 +135,8 @@ export function AIChatbot() {
                 <li>Answering questions about your financial data</li>
               </ul>
               <p>Try asking me something like:</p>
-              <p className="text-primary italic">"How much did I spend on food this month?"</p>
-              <p className="text-primary italic">"What's my best performing stock?"</p>
+              <p className="text-primary italic">&ldquo;How much did I spend on food this month?&rdquo;</p>
+              <p className="text-primary italic">&ldquo;What&apos;s my best performing stock?&rdquo;</p>
             </div>
           )}
           {messages.map((message, index) => (

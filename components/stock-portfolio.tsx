@@ -53,140 +53,67 @@ export function StockPortfolio() {
     getStorageItem('STOCK_PORTFOLIO_HISTORY', [])
   )
   const [selectedStock, setSelectedStock] = useState<Stock | null>(null)
-  const [selectedTimeRange, setSelectedTimeRange] = useState("1M")
+  const [selectedTimeRange, setSelectedTimeRange] = useState("1D")
   const [purchaseDetails, setPurchaseDetails] = useState({
     quantity: "",
     price: "",
   })
   const [isLoading, setIsLoading] = useState(false)
   const [chartData, setChartData] = useState<PortfolioHistory[]>([])
+  const [currentValue, setCurrentValue] = useState(0)
 
   useEffect(() => {
     fetchStocks()
   }, [])
 
   useEffect(() => {
-    setStorageItem('STOCK_PORTFOLIO', portfolio)
+    const calculateCurrentValue = () => {
+      return portfolio.reduce((sum, stock) => {
+        const price = stock.current_price || stock.purchasePrice
+        return sum + (stock.quantity * price)
+      }, 0)
+    }
+
+    const total = calculateCurrentValue()
+    setCurrentValue(total)
+    
     // Add a new history point when portfolio changes
     const historyPoint: PortfolioHistory = {
       date: new Date().toISOString(),
-      value: calculateCurrentValue(),
+      value: total
     }
+    
     const newHistory = [...portfolioHistory, historyPoint].sort((a, b) => 
       new Date(a.date).getTime() - new Date(b.date).getTime()
     )
+    
     setPortfolioHistory(newHistory)
+    setStorageItem('STOCK_PORTFOLIO', portfolio)
     setStorageItem('STOCK_PORTFOLIO_HISTORY', newHistory)
-  }, [portfolio])
+  }, [portfolio, portfolioHistory])
 
   useEffect(() => {
-    updateChartData()
-  }, [selectedTimeRange, portfolioHistory])
-
-  const updateChartData = () => {
-    const selectedRange = TIME_RANGES.find(range => range.label === selectedTimeRange)
-    if (!selectedRange) return
-
-    const cutoffDate = new Date()
-    cutoffDate.setDate(cutoffDate.getDate() - selectedRange.days)
-
-    // Filter data points within the selected time range
-    const filteredData = portfolioHistory.filter(point => 
-      new Date(point.date) > cutoffDate
-    )
-
-    // Aggregate data based on the interval
-    const aggregatedData = aggregateDataByInterval(
-      filteredData,
-      selectedRange.interval,
-      cutoffDate
-    )
-
-    setChartData(aggregatedData)
-  }
-
-  const aggregateDataByInterval = (
-    data: PortfolioHistory[],
-    interval: typeof TIME_RANGES[number]['interval'],
-    startDate: Date
-  ) => {
-    if (data.length === 0) return []
-
-    const aggregated: PortfolioHistory[] = []
-    const now = new Date()
-
-    switch (interval) {
-      case 'hourly':
-        // For hourly, use all data points
-        return data
-      
-      case 'daily':
-        // Group by day
-        for (let d = new Date(startDate); d <= now; d.setDate(d.getDate() + 1)) {
-          const dayData = data.filter(point => 
-            new Date(point.date).toDateString() === d.toDateString()
-          )
-          if (dayData.length > 0) {
-            aggregated.push({
-              date: d.toISOString(),
-              value: dayData[dayData.length - 1].value
-            })
-          }
-        }
-        break
-
-      case 'weekly':
-        // Group by week
-        for (let d = new Date(startDate); d <= now; d.setDate(d.getDate() + 7)) {
-          const weekData = data.filter(point => {
-            const pointDate = new Date(point.date)
-            return pointDate >= d && pointDate < new Date(d.getTime() + 7 * 24 * 60 * 60 * 1000)
-          })
-          if (weekData.length > 0) {
-            aggregated.push({
-              date: d.toISOString(),
-              value: weekData[weekData.length - 1].value
-            })
-          }
-        }
-        break
-
-      case 'monthly':
-        // Group by month
-        for (let d = new Date(startDate); d <= now; d.setMonth(d.getMonth() + 1)) {
-          const monthData = data.filter(point => {
-            const pointDate = new Date(point.date)
-            return pointDate.getMonth() === d.getMonth() && 
-                   pointDate.getFullYear() === d.getFullYear()
-          })
-          if (monthData.length > 0) {
-            aggregated.push({
-              date: d.toISOString(),
-              value: monthData[monthData.length - 1].value
-            })
-          }
-        }
-        break
-
-      case 'yearly':
-        // Group by year
-        for (let d = new Date(startDate); d <= now; d.setFullYear(d.getFullYear() + 1)) {
-          const yearData = data.filter(point => {
-            const pointDate = new Date(point.date)
-            return pointDate.getFullYear() === d.getFullYear()
-          })
-          if (yearData.length > 0) {
-            aggregated.push({
-              date: d.toISOString(),
-              value: yearData[yearData.length - 1].value
-            })
-          }
-        }
-        break
+    const timeRangeInDays: Record<string, number> = {
+      "1D": 1,
+      "1W": 7,
+      "1M": 30,
+      "3M": 90,
+      "6M": 180,
+      "1Y": 365,
+      "5Y": 1825,
+      "10Y": 3650
     }
-
-    return aggregated
-  }
+    
+    const days = timeRangeInDays[selectedTimeRange] || 1
+    const cutoff = new Date()
+    cutoff.setDate(cutoff.getDate() - days)
+    
+    const filteredHistory = portfolioHistory.filter(entry => 
+      new Date(entry.date) >= cutoff
+    )
+    
+    setChartData(filteredHistory)
+  }, [selectedTimeRange, portfolioHistory])
 
   const fetchStocks = async () => {
     try {
@@ -256,17 +183,8 @@ export function StockPortfolio() {
     return portfolio.reduce((total, stock) => total + stock.totalValue, 0)
   }
 
-  const calculateCurrentValue = () => {
-    return portfolio.reduce((total, stock) => {
-      const currentPrice = stock.current_price || stock.purchasePrice
-      return total + (currentPrice * stock.quantity)
-    }, 0)
-  }
-
   const calculateTotalProfitLoss = () => {
-    const currentValue = calculateCurrentValue()
-    const totalInvestment = calculateTotalValue()
-    return currentValue - totalInvestment
+    return currentValue - calculateTotalValue()
   }
 
   return (
@@ -304,7 +222,7 @@ export function StockPortfolio() {
             <CardTitle className="text-sm md:text-base">Current Value</CardTitle>
           </CardHeader>
           <CardContent className="p-4 md:p-6">
-            <div className="text-xl md:text-2xl font-bold">${calculateCurrentValue().toFixed(2)}</div>
+            <div className="text-xl md:text-2xl font-bold">${currentValue.toFixed(2)}</div>
           </CardContent>
         </Card>
         <Card className="col-span-1">

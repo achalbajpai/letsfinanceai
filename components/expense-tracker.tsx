@@ -18,10 +18,6 @@ interface Expense {
   description: string
 }
 
-interface CurrencyRates {
-  [key: string]: number
-}
-
 const DEFAULT_CATEGORIES = [
   "Food",
   "Transportation",
@@ -49,13 +45,26 @@ export function ExpenseTracker() {
   const [categories, setCategories] = useState(() =>
     getStorageItem('EXPENSE_CATEGORIES', DEFAULT_CATEGORIES)
   )
-  const [displayCurrency, setDisplayCurrency] = useState(() =>
-    getStorageItem('CURRENCY_PREFERENCES', 'USD')
-  )
-  const [currencyRates, setCurrencyRates] = useState<CurrencyRates>({})
+  const [selectedCurrency, setSelectedCurrency] = useState("USD")
+  const [currencyRates, setCurrencyRates] = useState<Record<string, number>>({})
   const [newCategory, setNewCategory] = useState("")
   const [showAddCategory, setShowAddCategory] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+
+  useEffect(() => {
+    const fetchCurrencyRates = async () => {
+      try {
+        const response = await fetch(`/api/currency?base=${selectedCurrency}`)
+        const data = await response.json()
+        if (data.data) {
+          setCurrencyRates(data.data)
+        }
+      } catch (error) {
+        console.error("Error fetching currency rates:", error)
+      }
+    }
+    
+    fetchCurrencyRates()
+  }, [selectedCurrency])
 
   useEffect(() => {
     setStorageItem('EXPENSES', expenses)
@@ -66,24 +75,8 @@ export function ExpenseTracker() {
   }, [categories])
 
   useEffect(() => {
-    setStorageItem('CURRENCY_PREFERENCES', displayCurrency)
-    fetchCurrencyRates()
-  }, [displayCurrency])
-
-  const fetchCurrencyRates = async () => {
-    try {
-      setIsLoading(true)
-      const response = await fetch(`/api/currency?base=${displayCurrency}`)
-      const data = await response.json()
-      if (data.data) {
-        setCurrencyRates(data.data.rates)
-      }
-    } catch (error) {
-      console.error("Error fetching currency rates:", error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
+    setStorageItem('CURRENCY_PREFERENCES', selectedCurrency)
+  }, [selectedCurrency])
 
   const convertAmount = (amount: number, fromCurrency: string, toCurrency: string): number => {
     if (fromCurrency === toCurrency) return amount
@@ -130,7 +123,7 @@ export function ExpenseTracker() {
     return expenses
       .filter((expense) => new Date(expense.date) > cutoff)
       .reduce((sum, expense) => {
-        const convertedAmount = convertAmount(expense.amount, expense.currency, displayCurrency)
+        const convertedAmount = convertAmount(expense.amount, expense.currency, selectedCurrency)
         return sum + convertedAmount
       }, 0)
       .toFixed(2)
@@ -142,7 +135,7 @@ export function ExpenseTracker() {
         <h1 className="text-2xl md:text-3xl font-bold">Expense Tracker</h1>
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground">Display Currency:</span>
-          <Select value={displayCurrency} onValueChange={setDisplayCurrency}>
+          <Select value={selectedCurrency} onValueChange={setSelectedCurrency}>
             <SelectTrigger className="w-[100px]">
               <SelectValue placeholder="Currency" />
             </SelectTrigger>
@@ -164,7 +157,7 @@ export function ExpenseTracker() {
           </CardHeader>
           <CardContent className="p-4 md:p-6">
             <div className="text-xl md:text-2xl font-bold">
-              {displayCurrency} {calculateTotal(1)}
+              {selectedCurrency} {calculateTotal(1)}
             </div>
           </CardContent>
         </Card>
@@ -174,7 +167,7 @@ export function ExpenseTracker() {
           </CardHeader>
           <CardContent className="p-4 md:p-6">
             <div className="text-xl md:text-2xl font-bold">
-              {displayCurrency} {calculateTotal(7)}
+              {selectedCurrency} {calculateTotal(7)}
             </div>
           </CardContent>
         </Card>
@@ -184,7 +177,7 @@ export function ExpenseTracker() {
           </CardHeader>
           <CardContent className="p-4 md:p-6">
             <div className="text-xl md:text-2xl font-bold">
-              {displayCurrency} {calculateTotal(30)}
+              {selectedCurrency} {calculateTotal(30)}
             </div>
           </CardContent>
         </Card>
@@ -194,7 +187,7 @@ export function ExpenseTracker() {
           </CardHeader>
           <CardContent className="p-4 md:p-6">
             <div className="text-xl md:text-2xl font-bold">
-              {displayCurrency} {calculateTotal(365)}
+              {selectedCurrency} {calculateTotal(365)}
             </div>
           </CardContent>
         </Card>
@@ -289,7 +282,7 @@ export function ExpenseTracker() {
           </CardHeader>
           <CardContent className="p-4 md:p-6">
             <div className="h-[200px] md:h-[300px]">
-              <ExpenseChart expenses={expenses} displayCurrency={displayCurrency} convertAmount={convertAmount} />
+              <ExpenseChart expenses={expenses} displayCurrency={selectedCurrency} convertAmount={convertAmount} />
             </div>
           </CardContent>
         </Card>
@@ -301,7 +294,7 @@ export function ExpenseTracker() {
             <ExpenseList 
               expenses={expenses} 
               onDelete={deleteExpense} 
-              displayCurrency={displayCurrency}
+              displayCurrency={selectedCurrency}
               convertAmount={convertAmount}
             />
           </CardContent>

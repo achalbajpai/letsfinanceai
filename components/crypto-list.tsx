@@ -1,6 +1,20 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
-export function CryptoList({ cryptos }) {
+interface Crypto {
+  id: string;
+  symbol: string;
+  name: string;
+  quantity: number;
+  purchasePrice: number;
+  currentPrice: number;
+  totalValue: number;
+}
+
+interface CryptoListProps {
+  cryptos: Crypto[];
+}
+
+export function CryptoList({ cryptos }: CryptoListProps) {
   return (
     <Table>
       <TableHeader>

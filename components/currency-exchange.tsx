@@ -10,14 +10,18 @@ import { ExchangeRateChart } from "@/components/exchange-rate-chart"
 const currencies = ["USD", "EUR", "GBP", "JPY", "CAD", "AUD", "CHF", "CNY", "INR"]
 
 export function CurrencyExchange() {
-  const [amount, setAmount] = useState("1")
+  const [amount, setAmount] = useState("")
   const [fromCurrency, setFromCurrency] = useState("USD")
   const [toCurrency, setToCurrency] = useState("EUR")
-  const [exchangeRate, setExchangeRate] = useState(null)
-  const [convertedAmount, setConvertedAmount] = useState(null)
+  const [exchangeRate, setExchangeRate] = useState<number | null>(null)
+  const [convertedAmount, setConvertedAmount] = useState<string | null>(null)
 
   useEffect(() => {
-    // In a real application, you would fetch the exchange rate from an API
+    if (!amount) {
+      setConvertedAmount(null)
+      return
+    }
+
     // For this example, we'll use a mock exchange rate
     const mockExchangeRate = 0.85
     setExchangeRate(mockExchangeRate)
