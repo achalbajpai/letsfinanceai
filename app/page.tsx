@@ -28,7 +28,7 @@ export default function Home() {
             LetsFinanceAI
           </CardTitle>
           <CardDescription className="text-center">
-            Make Finance Easier
+            Your AI-Powered Financial Management Platform
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -52,6 +52,9 @@ export default function Home() {
             <Button type="submit" className="w-full">
               Login
             </Button>
+            <p className="text-xs text-center text-muted-foreground mt-2">
+              Use username: test, password: test123 for demo
+            </p>
           </form>
         </CardContent>
       </Card>
