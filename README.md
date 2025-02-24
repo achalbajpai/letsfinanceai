@@ -6,6 +6,8 @@
 
 Track expenses, manage investments, and get personalized financial insights with ease.
 
+<img width="1795" alt="image" src="https://github.com/user-attachments/assets/06a4c4a7-3c17-4bda-8ba5-66d2cd00c4f6" />
+
 ---
 
 > [!NOTE]
