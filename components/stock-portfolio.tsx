@@ -97,7 +97,7 @@ export function StockPortfolio() {
       setStorageItem('STOCK_PORTFOLIO', portfolio)
       setStorageItem('STOCK_PORTFOLIO_HISTORY', newHistory)
     }
-  }, [portfolio]) // Only depend on portfolio changes
+  }, [portfolio, portfolioHistory])
 
   useEffect(() => {
     const timeRangeInDays: Record<string, number> = {

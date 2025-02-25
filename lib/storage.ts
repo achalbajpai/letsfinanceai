@@ -5,6 +5,10 @@ const STORAGE_KEYS = {
   STOCK_PORTFOLIO_HISTORY: 'stock-portfolio-history',
   CRYPTO_PORTFOLIO: 'crypto-portfolio',
   CURRENCY_PREFERENCES: 'currency-preferences',
+  BUDGETS: 'budgets',
+  RECURRING_EXPENSES: 'recurring-expenses',
+  FINANCIAL_GOALS: 'financial-goals',
+  NOTIFICATIONS: 'notifications',
 } as const;
 
 export function getStorageItem<T>(key: keyof typeof STORAGE_KEYS, defaultValue: T): T {
