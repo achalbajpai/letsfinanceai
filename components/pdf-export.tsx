@@ -11,6 +11,15 @@ import { getStorageItem } from "@/lib/storage"
 import { formatCurrency } from "@/lib/utils"
 import type { CheckedState } from "@radix-ui/react-checkbox"
 
+// Type augmentation for jsPDF to include properties added by plugins
+declare module "jspdf" {
+  interface jsPDF {
+    lastAutoTable?: {
+      finalY: number;
+    };
+  }
+}
+
 // Define interfaces for type safety
 interface Expense {
   id: string
@@ -118,7 +127,7 @@ export function PDFExport() {
       
       // Add recurring expenses
       if (includeRecurring) {
-        yPosition = await addRecurringExpenses(doc, yPosition)
+        await addRecurringExpenses(doc, yPosition)
       }
       
       // Add footer with page numbers
@@ -169,7 +178,7 @@ export function PDFExport() {
       columnStyles: { 0: { fontStyle: "bold" } },
     })
     
-    return (doc as any).lastAutoTable?.finalY || startY + 40
+    return doc.lastAutoTable?.finalY || startY + 40
   }
   
   const addExpenses = async (doc: jsPDF, startY: number): Promise<number> => {
@@ -208,7 +217,7 @@ export function PDFExport() {
       startY += 20
     }
     
-    return (doc as any).lastAutoTable?.finalY || startY + 40
+    return doc.lastAutoTable?.finalY || startY + 40
   }
   
   const addStocks = async (doc: jsPDF, startY: number): Promise<number> => {
@@ -272,7 +281,7 @@ export function PDFExport() {
       startY += 20
     }
     
-    return (doc as any).lastAutoTable?.finalY || startY + 40
+    return doc.lastAutoTable?.finalY || startY + 40
   }
   
   const addCrypto = async (doc: jsPDF, startY: number): Promise<number> => {
@@ -336,7 +345,7 @@ export function PDFExport() {
       startY += 20
     }
     
-    return (doc as any).lastAutoTable?.finalY || startY + 40
+    return doc.lastAutoTable?.finalY || startY + 40
   }
   
   const addGoals = async (doc: jsPDF, startY: number): Promise<number> => {
@@ -378,7 +387,7 @@ export function PDFExport() {
       startY += 20
     }
     
-    return (doc as any).lastAutoTable?.finalY || startY + 40
+    return doc.lastAutoTable?.finalY || startY + 40
   }
   
   const addRecurringExpenses = async (doc: jsPDF, startY: number): Promise<number> => {
@@ -431,7 +440,7 @@ export function PDFExport() {
       startY += 20
     }
     
-    return (doc as any).lastAutoTable?.finalY || startY + 40
+    return doc.lastAutoTable?.finalY || startY + 40
   }
   
   // Helper functions to calculate financial metrics

@@ -117,7 +117,7 @@ export function FinancialHealth() {
     )
     
     setHealthScore(overallScore)
-  }, [mounted, monthlyIncome, debt])
+  }, [mounted, monthlyIncome, debt, goalProgress])
   
   const getScoreColor = (score: number) => {
     if (score >= 80) return "text-green-500"

@@ -42,13 +42,10 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table"
-import { Slider } from "@/components/ui/slider"
 import { 
   Calculator,
   Info,
   HelpCircle,
-  BarChart4,
-  Download,
   Save
 } from "lucide-react"
 import {
@@ -149,12 +146,21 @@ export function TaxCalculator() {
   useEffect(() => {
     setMounted(true)
     
-    // Get saved tax data from localStorage
-    const savedData = getStorageItem<TaxFormValues>(TAX_FORM_STORAGE_KEY, null);
+    // Set saved data if available
+    if (mounted) {
+      // Get saved tax data from localStorage
+      const savedData = getStorageItem<TaxFormValues>(TAX_FORM_STORAGE_KEY, {
+        income: 0,
+        filingStatus: "single",
+        deductions: 0,
+        useStandardDeduction: true,
+        credits: 0
+      });
     
-    if (savedData) {
-      // Reset form with saved values
-      form.reset(savedData);
+      if (savedData) {
+        // Reset form with saved values
+        form.reset(savedData)
+      }
     }
     
     // Calculate taxes on initial render with default or saved values
@@ -192,7 +198,7 @@ export function TaxCalculator() {
     
     // Calculate tax by bracket
     let totalTax = 0
-    let bracketBreakdown: Array<{
+    const bracketBreakdown: Array<{
       bracket: string;
       amount: number;
       tax: number;
@@ -205,7 +211,7 @@ export function TaxCalculator() {
     )?.rate || 0
     
     // Calculate tax for each bracket
-    brackets.forEach((bracket, index) => {
+    brackets.forEach((bracket) => {
       let taxableAmountInBracket
       
       if (taxableIncome <= bracket.min) {
@@ -575,6 +581,9 @@ export function TaxCalculator() {
       <CardFooter className="flex justify-between text-xs text-muted-foreground">
         <p>Tax rates based on 2023 US federal income tax brackets</p>
         <p>* This is an estimate only. Consult a tax professional for advice.</p>
+        <span className="text-sm text-muted-foreground">
+          Don&apos;t worry, your data is stored locally and never sent to a server.
+        </span>
       </CardFooter>
     </Card>
   )

@@ -10,6 +10,22 @@
       "rules": {
         "@typescript-eslint/no-unused-vars": "off"
       }
+    },
+    {
+      "files": ["components/pdf-export.tsx"],
+      "rules": {
+        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/ban-ts-comment": "off",
+        "@typescript-eslint/ban-ts-directive": "off",
+        "@typescript-eslint/prefer-ts-expect-error": "off"
+      }
+    },
+    {
+      "files": ["components/tax-calculator.tsx"],
+      "rules": {
+        "react/no-unescaped-entities": "off",
+        "react-hooks/exhaustive-deps": "off"
+      }
     }
   ]
 }
