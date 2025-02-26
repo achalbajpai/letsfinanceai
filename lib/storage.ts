@@ -9,6 +9,9 @@ const STORAGE_KEYS = {
   RECURRING_EXPENSES: 'recurring-expenses',
   FINANCIAL_GOALS: 'financial-goals',
   NOTIFICATIONS: 'notifications',
+  TAX_FORM_DATA: 'tax-form-data',
+  NOTIFICATION_PREFERENCES: 'notification-preferences',
+  ROI_CALCULATOR_DATA: 'roi-calculator-data',
 } as const;
 
 export function getStorageItem<T>(key: keyof typeof STORAGE_KEYS, defaultValue: T): T {

@@ -22,9 +22,6 @@ const initialState: ThemeProviderState = {
 
 const ThemeContext = createContext<ThemeProviderState>(initialState)
 
-// Create an isomorphic layout effect that works on both server and client
-const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? React.useLayoutEffect : React.useEffect
-
 export function ThemeProvider({
   children,
   defaultTheme = "system",
@@ -32,9 +29,13 @@ export function ThemeProvider({
   const [theme, setTheme] = useState<Theme>(defaultTheme)
   const [mounted, setMounted] = useState(false)
 
-  // Once mounted on client, update with stored or system preference
-  useIsomorphicLayoutEffect(() => {
+  // Only run this effect after component is mounted on client
+  useEffect(() => {
+    setMounted(true)
+    
+    // Get stored theme preference from localStorage
     const storedTheme = localStorage.getItem("theme") as Theme | null
+    
     if (storedTheme) {
       setTheme(storedTheme)
     } else if (defaultTheme === "system") {
@@ -43,9 +44,9 @@ export function ThemeProvider({
         : "light"
       setTheme(systemTheme)
     }
-    setMounted(true)
   }, [defaultTheme])
 
+  // Apply theme class to document element
   useEffect(() => {
     if (!mounted) return
 
@@ -59,10 +60,9 @@ export function ThemeProvider({
         ? "dark"
         : "light"
       root.classList.add(systemTheme)
-      return
+    } else {
+      root.classList.add(theme)
     }
-    
-    root.classList.add(theme)
   }, [theme, mounted])
 
   // During SSR and before hydration, render with initial theme to avoid flicker

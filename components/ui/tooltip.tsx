@@ -7,7 +7,20 @@ import { cn } from "@/lib/utils"
 
 const TooltipProvider = TooltipPrimitive.Provider
 
-const Tooltip = TooltipPrimitive.Root
+const Tooltip = ({ ...props }: React.ComponentProps<typeof TooltipPrimitive.Root>) => {
+  // Only render the Tooltip on the client
+  const [mounted, setMounted] = React.useState(false)
+  
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
+  
+  if (!mounted) {
+    return null
+  }
+  
+  return <TooltipPrimitive.Root {...props} />
+}
 
 const TooltipTrigger = TooltipPrimitive.Trigger
 

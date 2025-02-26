@@ -20,6 +20,10 @@ export default function Home() {
     }
   }
 
+  const fillTestCredentials = () => {
+    setCredentials({ username: 'test', password: 'test123' })
+  }
+
   return (
     <main className="min-h-screen flex items-center justify-center bg-background">
       <Card className="w-[350px]">
@@ -51,6 +55,14 @@ export default function Home() {
             </div>
             <Button type="submit" className="w-full">
               Login
+            </Button>
+            <Button 
+              type="button" 
+              variant="outline" 
+              className="w-full mt-2" 
+              onClick={fillTestCredentials}
+            >
+              Use Demo Credentials
             </Button>
             <p className="text-xs text-center text-muted-foreground mt-2">
               Use username: test, password: test123 for demo

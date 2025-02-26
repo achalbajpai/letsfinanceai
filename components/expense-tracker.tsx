@@ -32,9 +32,14 @@ const DEFAULT_CATEGORIES = [
 const CURRENCIES = ["USD", "EUR", "GBP", "JPY", "INR"]
 
 export function ExpenseTracker() {
-  const [expenses, setExpenses] = useState<Expense[]>(() =>
-    getStorageItem('EXPENSES', [])
-  )
+  // Add mounted state to handle hydration
+  const [mounted, setMounted] = useState(false)
+  
+  // Initialize states with empty/default values for server-side rendering
+  const [expenses, setExpenses] = useState<Expense[]>([])
+  const [categories, setCategories] = useState(DEFAULT_CATEGORIES)
+  const [selectedCurrency, setSelectedCurrency] = useState("USD")
+  
   const [newExpense, setNewExpense] = useState({
     amount: "",
     category: "",
@@ -42,15 +47,22 @@ export function ExpenseTracker() {
     description: "",
     date: new Date().toISOString().split('T')[0],
   })
-  const [categories, setCategories] = useState(() =>
-    getStorageItem('EXPENSE_CATEGORIES', DEFAULT_CATEGORIES)
-  )
-  const [selectedCurrency, setSelectedCurrency] = useState("USD")
+  
   const [currencyRates, setCurrencyRates] = useState<Record<string, number>>({})
   const [newCategory, setNewCategory] = useState("")
   const [showAddCategory, setShowAddCategory] = useState(false)
 
+  // Set mounted state and load data from localStorage
   useEffect(() => {
+    setMounted(true)
+    setExpenses(getStorageItem('EXPENSES', []))
+    setCategories(getStorageItem('EXPENSE_CATEGORIES', DEFAULT_CATEGORIES))
+    setSelectedCurrency(getStorageItem('CURRENCY_PREFERENCES', "USD"))
+  }, [])
+
+  useEffect(() => {
+    if (!mounted) return
+    
     const fetchCurrencyRates = async () => {
       try {
         const response = await fetch(`/api/currency?base=${selectedCurrency}`)
@@ -64,19 +76,22 @@ export function ExpenseTracker() {
     }
     
     fetchCurrencyRates()
-  }, [selectedCurrency])
+  }, [selectedCurrency, mounted])
 
   useEffect(() => {
+    if (!mounted) return
     setStorageItem('EXPENSES', expenses)
-  }, [expenses])
+  }, [expenses, mounted])
 
   useEffect(() => {
+    if (!mounted) return
     setStorageItem('EXPENSE_CATEGORIES', categories)
-  }, [categories])
+  }, [categories, mounted])
 
   useEffect(() => {
+    if (!mounted) return
     setStorageItem('CURRENCY_PREFERENCES', selectedCurrency)
-  }, [selectedCurrency])
+  }, [selectedCurrency, mounted])
 
   const convertAmount = (amount: number, fromCurrency: string, toCurrency: string): number => {
     if (fromCurrency === toCurrency) return amount
@@ -118,6 +133,8 @@ export function ExpenseTracker() {
   }
 
   const calculateTotal = (days: number) => {
+    if (!mounted) return "0.00" // Return consistent initial value for SSR
+    
     const now = new Date()
     const cutoff = new Date(now.getTime() - days * 24 * 60 * 60 * 1000)
     return expenses
@@ -127,6 +144,32 @@ export function ExpenseTracker() {
         return sum + convertedAmount
       }, 0)
       .toFixed(2)
+  }
+
+  // Show a simple loading state during server-side rendering
+  if (!mounted) {
+    return (
+      <div className="space-y-6 p-4 md:p-6">
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl md:text-3xl font-bold">Expense Tracker</h1>
+        </div>
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i}>
+              <CardHeader className="p-4 md:p-6">
+                <CardTitle className="text-sm md:text-base">Loading...</CardTitle>
+              </CardHeader>
+              <CardContent className="p-4 md:p-6">
+                <div className="text-xl md:text-2xl font-bold">
+                  {selectedCurrency} 0.00
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        <div className="h-[200px] bg-muted/20 rounded-md animate-pulse"></div>
+      </div>
+    )
   }
 
   return (
