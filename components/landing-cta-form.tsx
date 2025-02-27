@@ -37,20 +37,20 @@ export default function LandingCtaForm() {
     >
       <form onSubmit={handleSubmit} className="relative">
         <div className="relative flex items-center rounded-full border border-white/10 bg-white/5 p-1 backdrop-blur-sm before:absolute before:-inset-[2px] before:rounded-full before:border before:border-white/10 before:p-1">
-          <input
+          <Input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="email@example.com"
-            className="flex-1 bg-transparent px-6 py-3 text-base text-white placeholder:text-white/40 focus:outline-none"
+            className="flex-1 bg-transparent border-0 px-6 py-3 text-base text-white placeholder:text-white/40 focus-visible:ring-0 focus-visible:ring-offset-0"
           />
-          <button
+          <Button
             type="submit"
             disabled={isLoading}
             className="rounded-full bg-gradient-to-r from-primary/90 to-primary/80 px-8 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
           >
             {isLoading ? "Getting Started..." : "GET STARTED"}
-          </button>
+          </Button>
         </div>
       </form>
     </motion.div>
