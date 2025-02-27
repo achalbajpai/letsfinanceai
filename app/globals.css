@@ -8,7 +8,20 @@
   }
 }
 
+@keyframes wave {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
 
+@layer components {
+  .animate-wave {
+    animation: wave ease-in-out infinite;
+  }
+}
 
 @layer base {
   :root {

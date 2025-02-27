@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { 
   ChevronRight, 
   Menu, 
-  X, 
   Settings, 
   PieChart, 
   LineChart, 
@@ -16,7 +15,8 @@ import {
   FileText,
   BellRing,
   Calculator,
-  Newspaper
+  Newspaper,
+  Home
 } from "lucide-react";
 import { ModeToggle } from "@/components/mode-toggle";
 import { ExpenseTracker } from "@/components/expense-tracker";
@@ -45,6 +45,22 @@ export default function DashboardPage() {
   // Set mounted state when component mounts
   useEffect(() => {
     setMounted(true);
+    
+    // Set initial sidebar state based on screen width
+    if (window.innerWidth < 768) {
+      setSidebarOpen(false);
+    } else {
+      setSidebarOpen(false); // Default to closed on desktop for clean look
+    }
+    
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setSidebarOpen(false);
+      }
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   const toggleSidebar = () => {
@@ -97,9 +113,11 @@ export default function DashboardPage() {
       }`}
     >
       <div className={`flex-shrink-0 ${activeTab === id ? "text-primary" : "text-muted-foreground"}`}>{icon}</div>
-      <span className={`text-sm transition-opacity duration-200 ${sidebarOpen ? "opacity-100" : "opacity-0 md:hidden"}`}>
-        {label}
-      </span>
+      {sidebarOpen && (
+        <span className="text-sm">
+          {label}
+        </span>
+      )}
     </button>
   );
 
@@ -189,23 +207,33 @@ export default function DashboardPage() {
       {/* Sidebar */}
       <aside 
         className={`fixed inset-y-0 left-0 z-50 flex flex-col border-r bg-card transition-all duration-300 ${
-          sidebarOpen ? "w-60" : "w-14"
-        } md:relative shadow-sm`}
+          sidebarOpen ? "w-60 translate-x-0" : "w-0 -translate-x-full md:w-14 md:translate-x-0"
+        } shadow-sm`}
       >
         {/* Sidebar header with toggle */}
-        <div className="border-b px-3 py-2.5 flex justify-between items-center h-14">
-          <h2 className={`font-medium text-base transition-opacity duration-200 ${
-            sidebarOpen ? "opacity-100" : "opacity-0 md:hidden"
-          }`}>
-            LetsFinanceAI
-          </h2>
-          <button
-            onClick={toggleSidebar}
-            className="p-1.5 rounded-md hover:bg-muted transition-colors"
-            aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
-          >
-            {sidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-          </button>
+        <div className="border-b py-3 flex justify-center items-center h-14">
+          {sidebarOpen ? (
+            <div className="flex justify-between items-center w-full px-3">
+              <h2 className="font-medium text-base">
+                LetsFinance<span className="text-cyan-400">AI</span>
+              </h2>
+              <button
+                onClick={toggleSidebar}
+                className="p-1.5 rounded-md hover:bg-muted transition-colors"
+                aria-label="Close sidebar"
+              >
+                <Menu className="h-4 w-4" />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={toggleSidebar}
+              className="p-1.5 rounded-md hover:bg-muted transition-colors md:flex hidden"
+              aria-label="Open sidebar"
+            >
+              <Menu className="h-4 w-4" />
+            </button>
+          )}
         </div>
         
         {/* Main navigation */}
@@ -232,9 +260,9 @@ export default function DashboardPage() {
           })}
         </div>
         
-        {/* Sidebar footer */}
+        {/* Sidebar footer with back to home link */}
         <div className="border-t p-2">
-          <div className="flex items-center justify-center gap-1 p-1">
+          <div className="flex items-center justify-center gap-1 p-1 flex-wrap">
             {mounted && <ModeToggle compact={true} />}
             
             <button
@@ -246,32 +274,50 @@ export default function DashboardPage() {
             >
               <Settings className="h-4 w-4" />
             </button>
+            
+            <a
+              href="/"
+              className="p-1.5 rounded-md hover:bg-muted transition-colors"
+              title="Back to Home"
+            >
+              <Home className="h-4 w-4" />
+            </a>
           </div>
         </div>
       </aside>
       
       {/* Main content area */}
-      <div className="flex-1 overflow-auto bg-background ml-0 md:ml-0 w-full">
-        {/* Top bar for mobile - only visible when sidebar is closed or on mobile */}
-        <div className={`sticky top-0 z-30 flex items-center justify-between border-b bg-card p-2.5 ${
-          sidebarOpen ? "md:hidden" : ""
-        }`}>
-          <div className="flex items-center">
+      <div className="flex-1 overflow-auto bg-background w-full md:pl-14">
+        {/* Top bar - always visible */}
+        <div className="sticky top-0 z-30 flex items-center justify-between border-b bg-card p-2.5">
+          <div className="flex items-center gap-2">
             <button
               onClick={toggleSidebar}
-              className="p-1.5 rounded-md hover:bg-muted transition-colors"
+              className="p-1.5 rounded-md hover:bg-muted transition-colors md:hidden"
+              aria-label="Toggle sidebar"
             >
               <Menu className="h-4 w-4" />
             </button>
-            <h1 className="text-lg font-bold px-2">LetsFinanceAI</h1>
+            <h1 className="text-lg font-bold">
+              LetsFinance<span className="text-cyan-400">AI</span>
+            </h1>
           </div>
-          <div className="md:hidden flex items-center">
-            {mounted && <ModeToggle compact={true} />}
+          <div className="flex items-center gap-2">
+            <a
+              href="/"
+              className="p-1.5 rounded-md hover:bg-muted transition-colors md:hidden"
+              title="Back to Home"
+            >
+              <Home className="h-4 w-4" />
+            </a>
+            <div className="md:hidden">
+              {mounted && <ModeToggle compact={true} />}
+            </div>
           </div>
         </div>
         
         {/* Main content */}
-        <div className={`p-4 md:p-6 bg-background text-foreground ${sidebarOpen ? "md:ml-0" : "ml-0"} transition-all duration-300`}>
+        <div className="p-4 md:p-6 bg-background text-foreground transition-all duration-300">
           {renderContent()}
         </div>
       </div>
@@ -279,8 +325,9 @@ export default function DashboardPage() {
       {/* Overlay for mobile when sidebar is open */}
       {sidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          className="fixed inset-0 bg-black/50 z-40 md:hidden backdrop-blur-sm"
           onClick={() => setSidebarOpen(false)}
+          aria-hidden="true"
         />
       )}
     </div>
